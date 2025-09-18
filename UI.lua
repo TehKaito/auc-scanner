@@ -1,9 +1,12 @@
--- UI.lua
+print("UI.lua загружен!")
+
+AlchemyHelper = AlchemyHelper or {}
+
 AlchemyHelper.UI = CreateFrame("Frame", "AlchemyHelperUI", UIParent, "BasicFrameTemplate")
-AlchemyHelper.UI:SetSize(400, 300)
+AlchemyHelper.UI:SetSize(300, 200)
 AlchemyHelper.UI:SetPoint("CENTER")
 AlchemyHelper.UI:Hide()
 
-AlchemyHelper.UI.title = AlchemyHelper.UI:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-AlchemyHelper.UI.title:SetPoint("TOP", 0, -10)
-AlchemyHelper.UI.title:SetText("Alchemy Helper UI работает!")
+local text = AlchemyHelper.UI:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+text:SetPoint("CENTER")
+text:SetText("Alchemy UI работает!")
