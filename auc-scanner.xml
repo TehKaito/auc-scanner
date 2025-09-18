@@ -10,7 +10,7 @@
             <Anchor point="CENTER"/>
         </Anchors>
 
-        <!-- Чёрный фон -->
+        <!-- Чёрный фон и рамка -->
         <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background"
                   edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
             <BackgroundInsets>
@@ -34,13 +34,28 @@
             </Layer>
         </Layers>
 
-        <!-- Кнопка закрытия -->
         <Frames>
+            <!-- Кнопка закрытия -->
             <Button name="$parentCloseButton" inherits="UIPanelCloseButton">
                 <Anchors>
                     <Anchor point="TOPRIGHT" x="-5" y="-5"/>
                 </Anchors>
             </Button>
         </Frames>
+
+        <!-- Обработчики перетаскивания -->
+        <Scripts>
+            <OnMouseDown>
+                if (arg1 == "LeftButton") then
+                AucScanner_OnDragStart()
+                end
+            </OnMouseDown>
+            <OnMouseUp>
+                AucScanner_OnDragStop()
+            </OnMouseUp>
+            <OnHide>
+                AucScanner_OnDragStop()
+            </OnHide>
+        </Scripts>
     </Frame>
 </Ui>

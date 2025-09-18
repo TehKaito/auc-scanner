@@ -1,3 +1,4 @@
+-- Функция переключения окна
 local function AucScanner_Toggle()
     if AucScannerFrame:IsShown() then
         AucScannerFrame:Hide()
@@ -6,25 +7,24 @@ local function AucScanner_Toggle()
     end
 end
 
+-- Обработчики перетаскивания (аналогично Accountant)
+function AucScanner_OnDragStart()
+    AucScannerFrame:StartMoving()
+    AucScannerFrame.isMoving = true
+end
+
+function AucScanner_OnDragStop()
+    AucScannerFrame:StopMovingOrSizing()
+    AucScannerFrame.isMoving = false
+end
+
+-- Регистрация slash-команды
 local function AucScanner_OnLoad()
     SLASH_AUCSCANNER1 = "/aucs"
     SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
-
-    -- Делаем окно перетаскиваемым
-    AucScannerFrame:SetMovable(true)
-    AucScannerFrame:EnableMouse(true)
-    AucScannerFrame:RegisterForDrag("LeftButton")
-
-    AucScannerFrame:SetScript("OnDragStart", function(self)
-        self:StartMoving()
-    end)
-
-    AucScannerFrame:SetScript("OnDragStop", function(self)
-        self:StopMovingOrSizing()
-    end)
 end
 
--- Ждём пока игрок войдёт в игру
+-- Запускаем после логина
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 loader:SetScript("OnEvent", AucScanner_OnLoad)
