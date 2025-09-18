@@ -32,8 +32,11 @@ local function DrawOnce()
     local data   = AlchemyIngredients and AlchemyIngredients[itemID]
     local name   = (data and data.name) or ("Item "..itemID)
 
-    -- иконка: пока ставим "?", потом обновим, когда GetItemInfo вернёт данные
-    local icon = select(10, GetItemInfo(itemID)) or "Interface\\Icons\\INV_Misc_QuestionMark"
+    -- Берём иконку (Vanilla возвращает 10-м аргументом)
+    local _, _, _, _, _, _, _, _, _, icon = GetItemInfo(itemID)
+    if not icon then
+        icon = "Interface\\Icons\\INV_Misc_QuestionMark"
+    end
 
     line = {}
     line.id = itemID
@@ -71,7 +74,7 @@ local function AucScanner_OnLoad()
     SLASH_AUCSCANNER1 = "/aucs"
     SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
 
-    -- когда окно показывают — отрисовываем
+    -- при открытии окна создаём элемент
     AucScannerFrame:SetScript("OnShow", DrawOnce)
 
     -- слушаем событие подгрузки предметов
