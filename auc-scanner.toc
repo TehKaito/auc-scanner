@@ -6,4 +6,4 @@
 ## SavedVariables: AlchemyDB
 
 Data_Ingredients.lua
-AlchemyHelper.lua
+auc-scanner.lua
