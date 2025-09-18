@@ -1,0 +1,11 @@
+## Interface: 11200
+## Title: Alchemy Helper
+## Notes: Аддон для статистики и анализа алхимических реагентов
+## Author: Kaito
+## Version: 0.1
+## SavedVariables: AlchemyDB
+
+Data_Ingredients.lua
+Data_Recipes.lua
+UI.lua
+AlchemyHelper.lua
