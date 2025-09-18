@@ -1,13 +1,13 @@
--- AlchemyHelper.lua
-AlchemyHelper = AlchemyHelper or {}
+-- auc-scanner.lua
+AucScanner = AucScanner or {}
 
 -------------------------------------------------
 -- Ленивое создание UI (без зависимостей)
 -------------------------------------------------
-function AlchemyHelper:EnsureUI()
+function AucScanner:EnsureUI()
   if self.UI then return end
 
-  local f = CreateFrame("Frame", "AlchemyHelperUI", UIParent)
+  local f = CreateFrame("Frame", "AucScannerUI", UIParent)
   f:SetWidth(420); f:SetHeight(480)
   f:SetPoint("CENTER")
   f:SetBackdrop({
@@ -21,9 +21,9 @@ function AlchemyHelper:EnsureUI()
 
   local title = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
   title:SetPoint("TOP", 0, -10)
-  title:SetText("Alchemy Helper")
+  title:SetText("Auc Scanner")
 
-  -- Кнопка закрытия (простая, без шаблонов)
+  -- Кнопка закрытия
   local close = CreateFrame("Button", nil, f)
   close:SetSize(24, 24)
   close:SetPoint("TOPRIGHT", -6, -6)
@@ -33,7 +33,7 @@ function AlchemyHelper:EnsureUI()
   close:SetScript("OnClick", function() f:Hide() end)
 
   -- Скролл
-  local scroll = CreateFrame("ScrollFrame", "AlchemyHelperScroll", f, "UIPanelScrollFrameTemplate")
+  local scroll = CreateFrame("ScrollFrame", "AucScannerScroll", f, "UIPanelScrollFrameTemplate")
   scroll:SetPoint("TOPLEFT", 10, -40)
   scroll:SetPoint("BOTTOMRIGHT", -28, 10)
 
@@ -72,7 +72,7 @@ end
 -------------------------------------------------
 -- Тоггл окна
 -------------------------------------------------
-function AlchemyHelper:ToggleUI()
+function AucScanner:ToggleUI()
   if not self.UI then self:EnsureUI() end
   if self.UI:IsShown() then self.UI:Hide() else self.UI:Show() end
 end
@@ -80,38 +80,5 @@ end
 -------------------------------------------------
 -- Команда чата
 -------------------------------------------------
-SLASH_ALCHEMY1 = "/alchemy"
-SlashCmdList["ALCHEMY"] = function() AlchemyHelper:ToggleUI() end
-
--------------------------------------------------
--- Кнопка у миникарты (если её не скрывает pfUI)
--------------------------------------------------
-do
-  if Minimap then
-    local btn = CreateFrame("Button", "AlchemyHelperMinimapButton", Minimap)
-    btn:SetSize(32, 32)
-    btn:SetPoint("TOPLEFT", Minimap, "TOPLEFT")
-    local ic = btn:CreateTexture(nil, "BACKGROUND")
-    ic:SetTexture("Interface\\Icons\\inv_potion_01")
-    ic:SetSize(20, 20)
-    ic:SetPoint("CENTER")
-    btn:SetScript("OnClick", function() AlchemyHelper:ToggleUI() end)
-    btn:SetScript("OnEnter", function(self)
-      GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-      GameTooltip:AddLine("Alchemy Helper")
-      GameTooltip:AddLine("Клик — открыть/закрыть", 1,1,1)
-      GameTooltip:AddLine("/alchemy", .8,.8,.8)
-      GameTooltip:Show()
-    end)
-    btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  end
-end
-
--------------------------------------------------
--- Сообщение при входе
--------------------------------------------------
-local ev = CreateFrame("Frame")
-ev:RegisterEvent("PLAYER_LOGIN")
-ev:SetScript("OnEvent", function()
-  DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00auc-scanner загружен|r — введите |cffffff00/alchemy|r")
-end)
+SLASH_AUC_SCANNER1 = "/alchemy"
+SlashCmdList["AUC_SCANNER"] = function() AucScanner:ToggleUI() end
