@@ -5,5 +5,4 @@
 ## Version: 0.1
 ## SavedVariables: AlchemyDB
 
-Data_Ingredients.lua
 auc-scanner.lua
