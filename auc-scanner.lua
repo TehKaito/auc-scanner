@@ -50,13 +50,19 @@ local function EnsureLineCreated()
     nameFont:SetText("Loading...")
 end
 
--- ---------- Обновление данных ----------
-local function UpdateIconAndName()
-    local name, _, _, _, _, _, _, _, _, texture = GetItemInfo(ITEM_ID)
-    if name and texture then
-        iconTex:SetTexture(texture)
-        nameFont:SetText(name)
-        return true
+-- ---------- Обновление из аукциона ----------
+local function UpdateFromAuction()
+    local numItems = GetNumAuctionItems("list")
+    for i = 1, numItems do
+        local name, _, count, quality, level, minBid, minInc, buyout,
+              bidAmount, highBidder, owner, saleStatus, itemID, hasAllInfo,
+              _, texture = GetAuctionItemInfo("list", i)
+
+        if name and itemID == ITEM_ID then
+            iconTex:SetTexture(texture)
+            nameFont:SetText(name)
+            return true
+        end
     end
     return false
 end
@@ -64,18 +70,20 @@ end
 -- ---------- Обработчик событий ----------
 local function OnEvent(self, event, ...)
     if event == "AUCTION_ITEM_LIST_UPDATE" then
-        -- пробуем снова взять данные
-        if UpdateIconAndName() then
-            -- успешно обновили — можно отписаться, если нужно
-            -- self:UnregisterEvent("AUCTION_ITEM_LIST_UPDATE")
-        end
+        EnsureLineCreated()
+        UpdateFromAuction()
     end
 end
 
 -- ---------- При показе окна ----------
 local function OnShow()
     EnsureLineCreated()
-    UpdateIconAndName()
+    -- пробуем через GetItemInfo на случай, если предмет уже в кеше
+    local name, _, _, _, _, _, _, _, _, texture = GetItemInfo(ITEM_ID)
+    if name and texture then
+        iconTex:SetTexture(texture)
+        nameFont:SetText(name)
+    end
 end
 
 -- ---------- Инициализация ----------
