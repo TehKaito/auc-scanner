@@ -7,24 +7,37 @@ local function AucScanner_Toggle()
     end
 end
 
--- перетаскивание
-function AucScanner_OnDragStart() AucScannerFrame:StartMoving() end
-function AucScanner_OnDragStop()  AucScannerFrame:StopMovingOrSizing() end
+-- ==========================
+-- Перетаскивание (для XML)
+-- ==========================
+function AucScanner_OnDragStart()
+    AucScannerFrame:StartMoving()
+    AucScannerFrame.isMoving = true
+end
 
--- один элемент (твой формат: [id] = { name = ... })
+function AucScanner_OnDragStop()
+    AucScannerFrame:StopMovingOrSizing()
+    AucScannerFrame.isMoving = false
+end
+
+-- ==========================
+-- Отрисовка одного элемента
+-- ==========================
 local line
 
 local function DrawOnce()
     if line then return end
 
-    local itemID = 2447
+    local itemID = 2447 -- Peacebloom
     local data   = AlchemyIngredients and AlchemyIngredients[itemID]
     local name   = (data and data.name) or ("Item "..itemID)
 
-    -- иконка: сначала ставим вопросик, потом обновим, когда клиент подгрузит информацию
+    -- иконка: пока ставим "?", потом обновим, когда GetItemInfo вернёт данные
     local icon = select(10, GetItemInfo(itemID)) or "Interface\\Icons\\INV_Misc_QuestionMark"
 
     line = {}
+    line.id = itemID
+
     line.icon = AucScannerFrame:CreateTexture(nil, "ARTWORK")
     line.icon:SetSize(32, 32)
     line.icon:SetPoint("TOPLEFT", 20, -40)
@@ -37,10 +50,16 @@ end
 
 local function RefreshIconIfReady()
     if not line then return end
-    local icon = select(10, GetItemInfo(2447))
-    if icon then line.icon:SetTexture(icon) end
+    local name, _, _, _, _, _, _, _, _, icon = GetItemInfo(line.id)
+    if name and icon then
+        line.icon:SetTexture(icon)
+        line.label:SetText(name)
+    end
 end
 
+-- ==========================
+-- События
+-- ==========================
 local function OnEvent(self, event, ...)
     if event == "GET_ITEM_INFO_RECEIVED" then
         RefreshIconIfReady()
@@ -48,18 +67,21 @@ local function OnEvent(self, event, ...)
 end
 
 local function AucScanner_OnLoad()
+    -- slash-команда
     SLASH_AUCSCANNER1 = "/aucs"
     SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
 
-    -- перерисовка, когда окно показывают
+    -- когда окно показывают — отрисовываем
     AucScannerFrame:SetScript("OnShow", DrawOnce)
 
-    -- когда иконка подгрузится из кеша клиента
+    -- слушаем событие подгрузки предметов
     AucScannerFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
     AucScannerFrame:SetScript("OnEvent", OnEvent)
 end
 
--- ждём логина
+-- ==========================
+-- Инициализация при входе
+-- ==========================
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 loader:SetScript("OnEvent", AucScanner_OnLoad)
