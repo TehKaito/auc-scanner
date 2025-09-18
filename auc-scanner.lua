@@ -1,47 +1,43 @@
--- Будем хранить объекты UI, чтобы обновить, если надо
-local ingredientLines = {}
-
-local function UpdateIngredientLine(line, data)
-    local itemID = data.id
-    local name, _, _, _, _, _, _, _, _, icon = GetItemInfo(itemID)
-    if not name then
-        name = data.name  -- fallback заранее заданного
-        icon = "Interface\\Icons\\INV_Misc_QuestionMark"
+local function AucScanner_Toggle()
+    if AucScannerFrame:IsShown() then
+        AucScannerFrame:Hide()
+    else
+        AucScannerFrame:Show()
     end
-    line.icon:SetTexture(icon)
-    line.label:SetText(name)
 end
 
-local function AucScanner_DrawIngredients()
-    -- Очистка предыдущих, если есть
-    for _, line in ipairs(ingredientLines) do
-        line.icon:Hide()
-        line.label:Hide()
-    end
-    wipe(ingredientLines)
+-- обработчики для перетаскивания
+function AucScanner_OnDragStart()
+    AucScannerFrame:StartMoving()
+end
 
+function AucScanner_OnDragStop()
+    AucScannerFrame:StopMovingOrSizing()
+end
+
+-- рисуем сетку с иконками и названиями
+local function AucScanner_DrawIngredients()
     local col, row = 0, 0
     local maxCols = 2
     local startX, startY = 20, -40
     local colWidth = 220
     local rowHeight = 40
 
-    for i, data in ipairs(AlchemyIngredients) do
-        local line = {}
-        -- текстура
-        line.icon = AucScannerFrame:CreateTexture(nil, "ARTWORK")
-        line.icon:SetSize(32, 32)
-        line.icon:SetPoint("TOPLEFT", AucScannerFrame, "TOPLEFT",
-            startX + col * colWidth, startY + (row * -rowHeight))
-        -- лейбл
-        line.label = AucScannerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        line.label:SetPoint("LEFT", line.icon, "RIGHT", 5, 0)
+    for itemID, data in pairs(AlchemyIngredients) do
+        local icon = GetItemIcon(itemID) or "Interface\\Icons\\INV_Misc_QuestionMark"
 
-        -- сразу обновляем
-        UpdateIngredientLine(line, data)
+        -- иконка
+        local tex = AucScannerFrame:CreateTexture(nil, "ARTWORK")
+        tex:SetSize(32, 32)
+        tex:SetPoint("TOPLEFT", AucScannerFrame, "TOPLEFT", startX + col * colWidth, startY + (row * -rowHeight))
+        tex:SetTexture(icon)
 
-        table.insert(ingredientLines, line)
+        -- название
+        local label = AucScannerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        label:SetPoint("LEFT", tex, "RIGHT", 5, 0)
+        label:SetText(data.name)
 
+        -- перенос на следующую колонку/строку
         col = col + 1
         if col >= maxCols then
             col = 0
@@ -50,25 +46,15 @@ local function AucScanner_DrawIngredients()
     end
 end
 
--- Обработчик события, когда данные о предмете приходят
-local function OnEvent(self, event, ...)
-    if event == "GET_ITEM_INFO_RECEIVED" then
-        -- обновляем все линии
-        for _, line in ipairs(ingredientLines) do
-            -- найдём data для этой линии
-            -- можно хранить data вместе с line
-            UpdateIngredientLine(line, line.data)
-        end
-    end
-end
-
--- В OnLoad регистрируем событие
+-- загрузка
 local function AucScanner_OnLoad()
     SLASH_AUCSCANNER1 = "/aucs"
     SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
 
-    AucScannerFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-    AucScannerFrame:SetScript("OnEvent", OnEvent)
-
     AucScanner_DrawIngredients()
 end
+
+-- ждём логина
+local loader = CreateFrame("Frame")
+loader:RegisterEvent("PLAYER_LOGIN")
+loader:SetScript("OnEvent", AucScanner_OnLoad)
