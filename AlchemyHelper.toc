@@ -2,9 +2,8 @@
 ## Title: auc-scanner
 ## Notes: Аддон для статистики и анализа алхимических реагентов
 ## Author: Kaito
-## Version: 0.2
+## Version: 0.1
 ## SavedVariables: AlchemyDB
 
 Data_Ingredients.lua
-UI.lua
 AlchemyHelper.lua
