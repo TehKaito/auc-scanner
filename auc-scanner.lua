@@ -1,3 +1,4 @@
+-- /aucs показать/скрыть окно
 local function AucScanner_Toggle()
     if AucScannerFrame:IsShown() then
         AucScannerFrame:Hide()
@@ -6,49 +7,43 @@ local function AucScanner_Toggle()
     end
 end
 
-function AucScanner_OnDragStart()
-    AucScannerFrame:StartMoving()
+-- перетаскивание
+function AucScanner_OnDragStart() AucScannerFrame:StartMoving() end
+function AucScanner_OnDragStop()  AucScannerFrame:StopMovingOrSizing() end
+
+-- один элемент (твой формат: [id] = { name = ... })
+local line
+
+local function DrawOnce()
+    if line then return end
+
+    local itemID = 2447
+    local data   = AlchemyIngredients and AlchemyIngredients[itemID]
+    local name   = (data and data.name) or ("Item "..itemID)
+
+    -- иконка: сначала ставим вопросик, потом обновим, когда клиент подгрузит информацию
+    local icon = select(10, GetItemInfo(itemID)) or "Interface\\Icons\\INV_Misc_QuestionMark"
+
+    line = {}
+    line.icon = AucScannerFrame:CreateTexture(nil, "ARTWORK")
+    line.icon:SetSize(32, 32)
+    line.icon:SetPoint("TOPLEFT", 20, -40)
+    line.icon:SetTexture(icon)
+
+    line.label = AucScannerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    line.label:SetPoint("LEFT", line.icon, "RIGHT", 5, 0)
+    line.label:SetText(name)
 end
 
-function AucScanner_OnDragStop()
-    AucScannerFrame:StopMovingOrSizing()
+local function RefreshIconIfReady()
+    if not line then return end
+    local icon = select(10, GetItemInfo(2447))
+    if icon then line.icon:SetTexture(icon) end
 end
 
--- рисуем сетку
-local function AucScanner_DrawIngredients()
-    local col, row = 0, 0
-    local maxCols = 2
-    local startX, startY = 20, -40
-    local colWidth = 220
-    local rowHeight = 40
-
-    for i, data in ipairs(AlchemyIngredients) do
-        local itemID = data.id
-        local icon = GetItemIcon(itemID)
-
-        if not icon then
-            icon = "Interface\\Icons\\INV_Misc_QuestionMark"
-            DEFAULT_CHAT_FRAME:AddMessage("No icon for ID "..itemID)
-        end
-
-        -- иконка
-        local tex = AucScannerFrame:CreateTexture(nil, "ARTWORK")
-        tex:SetSize(32, 32)
-        tex:SetPoint("TOPLEFT", AucScannerFrame, "TOPLEFT",
-            startX + col * colWidth, startY + (row * -rowHeight))
-        tex:SetTexture(icon)
-
-        -- название
-        local label = AucScannerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        label:SetPoint("LEFT", tex, "RIGHT", 5, 0)
-        label:SetText(data.name)
-
-        -- перенос
-        col = col + 1
-        if col >= maxCols then
-            col = 0
-            row = row + 1
-        end
+local function OnEvent(self, event, ...)
+    if event == "GET_ITEM_INFO_RECEIVED" then
+        RefreshIconIfReady()
     end
 end
 
@@ -56,9 +51,15 @@ local function AucScanner_OnLoad()
     SLASH_AUCSCANNER1 = "/aucs"
     SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
 
-    AucScanner_DrawIngredients()
+    -- перерисовка, когда окно показывают
+    AucScannerFrame:SetScript("OnShow", DrawOnce)
+
+    -- когда иконка подгрузится из кеша клиента
+    AucScannerFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+    AucScannerFrame:SetScript("OnEvent", OnEvent)
 end
 
+-- ждём логина
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 loader:SetScript("OnEvent", AucScanner_OnLoad)
