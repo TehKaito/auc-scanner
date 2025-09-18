@@ -1,5 +1,5 @@
 -- Главное окно
-local frame = CreateFrame("Frame", "AlchemyUI", UIParent, "BasicFrameTemplate")
+AlchemyUI = CreateFrame("Frame", "AlchemyUI", UIParent, "BasicFrameTemplate")
 frame:SetSize(400, 400)
 frame:SetPoint("CENTER")
 frame:Hide()
