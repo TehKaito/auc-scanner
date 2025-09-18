@@ -1,5 +1,4 @@
 AlchemyIngredients = {
-    -- 🌿 Травы (Herbalism)
     [2447]  = { name = "Peacebloom" },
     [765]   = { name = "Silverleaf" },
     [2449]  = { name = "Earthroot" },
@@ -28,13 +27,9 @@ AlchemyIngredients = {
     [13466] = { name = "Plaguebloom" },
     [13467] = { name = "Icecap" },
     [13468] = { name = "Black Lotus" },
-
-    -- 🧴 Флаконы (Vials)
     [3371]  = { name = "Empty Vial" },
     [3372]  = { name = "Leaded Vial" },
     [8925]  = { name = "Crystal Vial" },
-
-    -- 🧩 Специальные реагенты
     [7067]  = { name = "Elemental Earth" },
     [7068]  = { name = "Elemental Fire" },
     [7070]  = { name = "Elemental Water" },
@@ -44,14 +39,11 @@ AlchemyIngredients = {
     [7081]  = { name = "Essence of Air" },
     [12808] = { name = "Essence of Undeath" },
     [12803] = { name = "Living Essence" },
-
     [7971]  = { name = "Black Pearl" },
     [5637]  = { name = "Large Fang" },
     [10286] = { name = "Heart of the Wild" },
     [8153]  = { name = "Wildvine" },
     [13423] = { name = "Stonescale Oil" },
-
-    -- Красители
     [4342]  = { name = "Purple Dye" },
     [9210]  = { name = "Ghost Dye" },
 }

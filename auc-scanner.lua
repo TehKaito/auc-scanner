@@ -6,7 +6,6 @@ local function AucScanner_Toggle()
     end
 end
 
--- обработчики для перетаскивания
 function AucScanner_OnDragStart()
     AucScannerFrame:StartMoving()
 end
@@ -15,7 +14,7 @@ function AucScanner_OnDragStop()
     AucScannerFrame:StopMovingOrSizing()
 end
 
--- рисуем сетку с иконками и названиями
+-- рисуем сетку
 local function AucScanner_DrawIngredients()
     local col, row = 0, 0
     local maxCols = 2
@@ -23,13 +22,20 @@ local function AucScanner_DrawIngredients()
     local colWidth = 220
     local rowHeight = 40
 
-    for itemID, data in pairs(AlchemyIngredients) do
-        local icon = GetItemIcon(itemID) or "Interface\\Icons\\INV_Misc_QuestionMark"
+    for i, data in ipairs(AlchemyIngredients) do
+        local itemID = data.id
+        local icon = GetItemIcon(itemID)
+
+        if not icon then
+            icon = "Interface\\Icons\\INV_Misc_QuestionMark"
+            DEFAULT_CHAT_FRAME:AddMessage("No icon for ID "..itemID)
+        end
 
         -- иконка
         local tex = AucScannerFrame:CreateTexture(nil, "ARTWORK")
         tex:SetSize(32, 32)
-        tex:SetPoint("TOPLEFT", AucScannerFrame, "TOPLEFT", startX + col * colWidth, startY + (row * -rowHeight))
+        tex:SetPoint("TOPLEFT", AucScannerFrame, "TOPLEFT",
+            startX + col * colWidth, startY + (row * -rowHeight))
         tex:SetTexture(icon)
 
         -- название
@@ -37,7 +43,7 @@ local function AucScanner_DrawIngredients()
         label:SetPoint("LEFT", tex, "RIGHT", 5, 0)
         label:SetText(data.name)
 
-        -- перенос на следующую колонку/строку
+        -- перенос
         col = col + 1
         if col >= maxCols then
             col = 0
@@ -46,7 +52,6 @@ local function AucScanner_DrawIngredients()
     end
 end
 
--- загрузка
 local function AucScanner_OnLoad()
     SLASH_AUCSCANNER1 = "/aucs"
     SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
@@ -54,7 +59,6 @@ local function AucScanner_OnLoad()
     AucScanner_DrawIngredients()
 end
 
--- ждём логина
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 loader:SetScript("OnEvent", AucScanner_OnLoad)
