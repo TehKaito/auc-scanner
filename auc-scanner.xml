@@ -4,7 +4,7 @@
            toplevel="true" frameStrata="DIALOG"
            inherits="BasicFrameTemplateWithInset">
         <Size>
-            <AbsDimension x="300" y="200"/>
+            <AbsDimension x="600" y="600"/>
         </Size>
         <Anchors>
             <Anchor point="CENTER"/>

@@ -5,4 +5,5 @@
 ## Version: 1.0
 
 auc-scanner.xml
+ingredients.lua
 auc-scanner.lua
