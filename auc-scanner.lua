@@ -38,7 +38,7 @@ local iconTex, nameFont
 local cacheTip = CreateFrame("GameTooltip", "AucScanner_CacheTip", UIParent, "GameTooltipTemplate")
 cacheTip:SetOwner(UIParent, "ANCHOR_NONE")
 
--- в 1.12 GetItemInfo возвращает 10 значений, нам нужны name и texture
+-- Vanilla (1.12): GetItemInfo возвращает 10 значений; берём name и texture
 local function TryGetItemInfo(id)
     local name, link, quality, ilevel, reqLevel, class, subclass, stack, equipSlot, texture = GetItemInfo(id)
     return name, texture
@@ -68,9 +68,10 @@ local function UpdateIconAndName()
     return false
 end
 
--- ---------- Пуллинг (Vanilla: нет GET_ITEM_INFO_RECEIVED) ----------
+-- ---------- Пуллинг (в ванилле elapsed в глобальном arg1) ----------
 local pollingElapsed, pollingTries = 0, 0
-local function OnUpdatePoll(elapsed)
+local function OnUpdatePoll()
+    local elapsed = arg1 or 0
     pollingElapsed = pollingElapsed + elapsed
     if pollingElapsed < 0.25 then return end
     pollingElapsed = 0
@@ -82,6 +83,7 @@ local function OnUpdatePoll(elapsed)
 
     pollingTries = pollingTries + 1
     if pollingTries > 40 then
+        -- ~10 секунд попыток — оставляем вопросик и "Loading..."
         AucScannerFrame:SetScript("OnUpdate", nil)
     end
 end
@@ -90,7 +92,9 @@ end
 local function OnShow()
     EnsureLineCreated()
 
+    -- первая попытка: вдруг уже в кеше
     if not UpdateIconAndName() then
+        -- форсим подкачку предмета через скрытый тултип
         cacheTip:ClearLines()
         cacheTip:SetHyperlink("item:" .. ITEM_ID .. ":0:0:0:0:0:0:0")
         pollingElapsed, pollingTries = 0, 0
