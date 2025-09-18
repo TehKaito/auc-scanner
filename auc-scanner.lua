@@ -1,12 +1,12 @@
 -- Создаём простое окно
-local f = CreateFrame("Frame", "AucScannerFrame", UIParent, "BasicFrameTemplateWithInset")
+local f = CreateFrame("Frame", "AucScannerFrame", UIParent, "BasicFrameTemplate")
 f:SetSize(300, 200)
 f:SetPoint("CENTER")
 f:Hide()
 
 -- Заголовок окна
-f.title = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-f.title:SetPoint("CENTER", f.TitleBg, "CENTER", 0, 0)
+f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+f.title:SetPoint("TOP", f, "TOP", 0, -10)
 f.title:SetText("Auc Scanner")
 
 -- Регистрируем slash-команду /aucs
