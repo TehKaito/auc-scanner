@@ -6,6 +6,5 @@
 ## SavedVariables: AlchemyDB
 
 Data_Ingredients.lua
-Data_Recipes.lua
 UI.lua
 AlchemyHelper.lua
