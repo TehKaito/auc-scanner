@@ -54,7 +54,8 @@ local function EnsureLineCreated()
 
     -- Иконка (пока вопросик — заменим, когда появится реальная текстура)
     iconTex = AucScannerFrame:CreateTexture(nil, "ARTWORK")
-    iconTex:SetSize(32, 32)
+    iconTex:SetWidth(32)
+    iconTex:SetHeight(32)
     iconTex:SetPoint("TOPLEFT", 20, -50)
     iconTex:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 
