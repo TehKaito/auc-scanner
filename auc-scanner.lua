@@ -1,7 +1,9 @@
 -- =========================================================
--- auc-scanner.lua — тестовое окно с иконкой Peacebloom
+-- auc-scanner.lua — окно с иконкой Peacebloom
 -- /aucs — показать/скрыть окно
 -- =========================================================
+
+local ITEM_ID = 2447 -- Peacebloom
 
 -- ---------- Переключатель окна ----------
 local function AucScanner_Toggle()
@@ -31,18 +33,8 @@ function AucScanner_OnDragStop()
     end
 end
 
--- ---------- Одна иконка + название ----------
-local ITEM_ID = 2447 -- Peacebloom
-
+-- ---------- Элементы интерфейса ----------
 local iconTex, nameFont
-local cacheTip = CreateFrame("GameTooltip", "AucScanner_CacheTip", UIParent, "GameTooltipTemplate")
-cacheTip:SetOwner(UIParent, "ANCHOR_NONE")
-
--- Vanilla (1.12): GetItemInfo возвращает 10 значений; берём name и texture
-local function TryGetItemInfo(id)
-    local name, link, quality, ilevel, reqLevel, class, subclass, stack, equipSlot, texture = GetItemInfo(id)
-    return name, texture
-end
 
 local function EnsureLineCreated()
     if iconTex and nameFont then return end
@@ -58,9 +50,10 @@ local function EnsureLineCreated()
     nameFont:SetText("Loading...")
 end
 
+-- ---------- Обновление данных ----------
 local function UpdateIconAndName()
-    local name, texture = TryGetItemInfo(ITEM_ID)
-    if texture and name then
+    local name, _, _, _, _, _, _, _, _, texture = GetItemInfo(ITEM_ID)
+    if name and texture then
         iconTex:SetTexture(texture)
         nameFont:SetText(name)
         return true
@@ -68,44 +61,29 @@ local function UpdateIconAndName()
     return false
 end
 
--- ---------- Пуллинг (в ванилле elapsed в глобальном arg1) ----------
-local pollingElapsed, pollingTries = 0, 0
-local function OnUpdatePoll()
-    local elapsed = arg1 or 0
-    pollingElapsed = pollingElapsed + elapsed
-    if pollingElapsed < 0.25 then return end
-    pollingElapsed = 0
-
-    if UpdateIconAndName() then
-        AucScannerFrame:SetScript("OnUpdate", nil)
-        return
-    end
-
-    pollingTries = pollingTries + 1
-    if pollingTries > 40 then
-        -- ~10 секунд попыток — оставляем вопросик и "Loading..."
-        AucScannerFrame:SetScript("OnUpdate", nil)
+-- ---------- Обработчик событий ----------
+local function OnEvent(self, event, ...)
+    if event == "AUCTION_ITEM_LIST_UPDATE" then
+        -- пробуем снова взять данные
+        if UpdateIconAndName() then
+            -- успешно обновили — можно отписаться, если нужно
+            -- self:UnregisterEvent("AUCTION_ITEM_LIST_UPDATE")
+        end
     end
 end
 
--- ---------- Когда окно показывается ----------
+-- ---------- При показе окна ----------
 local function OnShow()
     EnsureLineCreated()
-
-    -- первая попытка: вдруг уже в кеше
-    if not UpdateIconAndName() then
-        -- форсим подкачку предмета через скрытый тултип
-        cacheTip:ClearLines()
-        cacheTip:SetHyperlink("item:" .. ITEM_ID .. ":0:0:0:0:0:0:0")
-        pollingElapsed, pollingTries = 0, 0
-        AucScannerFrame:SetScript("OnUpdate", OnUpdatePoll)
-    end
+    UpdateIconAndName()
 end
 
 -- ---------- Инициализация ----------
 local function OnVarsLoaded()
     if not AucScannerFrame then return end
     AucScannerFrame:SetScript("OnShow", OnShow)
+    AucScannerFrame:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
+    AucScannerFrame:SetScript("OnEvent", OnEvent)
 end
 
 local loader = CreateFrame("Frame")
