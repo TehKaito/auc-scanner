@@ -90,25 +90,23 @@ end
 local function OnEvent(self, event, ...)
     if event == "GET_ITEM_INFO_RECEIVED" then
         RefreshIcons()
+    elseif event == "VARIABLES_LOADED" then
+        -- slash-команда
+        SLASH_AUCSCANNER1 = "/aucs"
+        SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
+
+        -- рисуем при открытии окна
+        AucScannerFrame:SetScript("OnShow", DrawIngredients)
+
+        -- слушаем событие подгрузки иконок
+        AucScannerFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+        AucScannerFrame:SetScript("OnEvent", OnEvent)
     end
 end
 
-local function AucScanner_OnLoad()
-    -- slash-команда
-    SLASH_AUCSCANNER1 = "/aucs"
-    SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
-
-    -- рисуем при открытии окна
-    AucScannerFrame:SetScript("OnShow", DrawIngredients)
-
-    -- слушаем событие подгрузки иконок
-    AucScannerFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-    AucScannerFrame:SetScript("OnEvent", OnEvent)
-end
-
 -- ==========================
--- Инициализация при входе
+-- Инициализация
 -- ==========================
 local loader = CreateFrame("Frame")
-loader:RegisterEvent("PLAYER_LOGIN")
-loader:SetScript("OnEvent", AucScanner_OnLoad)
+loader:RegisterEvent("VARIABLES_LOADED")
+loader:SetScript("OnEvent", OnEvent)
