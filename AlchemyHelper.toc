@@ -1,5 +1,5 @@
 ## Interface: 11200
-## Title: Alchemy Helper
+## Title: auc-scanner
 ## Notes: Аддон для статистики и анализа алхимических реагентов
 ## Author: Kaito
 ## Version: 0.1
