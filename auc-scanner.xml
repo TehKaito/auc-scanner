@@ -1,0 +1,23 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Frame name="AucScannerFrame" parent="UIParent" hidden="true"
+           enableMouse="true" movable="true" clampedToScreen="true"
+           toplevel="true" frameStrata="DIALOG"
+           inherits="BasicFrameTemplateWithInset">
+        <Size>
+            <AbsDimension x="300" y="200"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+
+        <Layers>
+            <Layer level="ARTWORK">
+                <FontString name="$parentTitle" inherits="GameFontHighlight" text="Auc Scanner">
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parentTitleBg" relativePoint="LEFT" x="5" y="0"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+    </Frame>
+</Ui>

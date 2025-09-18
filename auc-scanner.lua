@@ -1,25 +1,17 @@
-local AucScannerUI = CreateFrame("Frame", "AucScannerMainFrame", UIParent, "BasicFrameTemplateWithInset")
-AucScannerUI:SetSize(300, 200)
-AucScannerUI:SetPoint("CENTER")
-AucScannerUI:SetMovable(true)
-AucScannerUI:EnableMouse(true)
-AucScannerUI:RegisterForDrag("LeftButton")
-AucScannerUI:SetScript("OnDragStart", AucScannerUI.StartMoving)
-AucScannerUI:SetScript("OnDragStop", AucScannerUI.StopMovingOrSizing)
-AucScannerUI:Hide()
-
--- Заголовок
-AucScannerUI.title = AucScannerUI:CreateFontString(nil, "OVERLAY")
-AucScannerUI.title:SetFontObject("GameFontHighlight")
-AucScannerUI.title:SetPoint("LEFT", AucScannerUI.TitleBg, "LEFT", 5, 0)
-AucScannerUI.title:SetText("Auc Scanner")
-
--- Слеш-команда
-SLASH_AUCSCANNER1 = "/aucs"
-SlashCmdList["AUCSCANNER"] = function()
-    if AucScannerUI:IsShown() then
-        AucScannerUI:Hide()
+local function AucScanner_Toggle()
+    if AucScannerFrame:IsShown() then
+        AucScannerFrame:Hide()
     else
-        AucScannerUI:Show()
+        AucScannerFrame:Show()
     end
 end
+
+local function AucScanner_OnLoad()
+    SLASH_AUCSCANNER1 = "/aucs"
+    SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
+end
+
+-- Ждём пока игрок войдёт в игру
+local loader = CreateFrame("Frame")
+loader:RegisterEvent("PLAYER_LOGIN")
+loader:SetScript("OnEvent", AucScanner_OnLoad)
