@@ -7,11 +7,11 @@ AlchemyHelper = {}
 -- Функция переключения окна
 -------------------------------------------------
 function AlchemyHelper:ToggleUI()
-    if AlchemyUI then
-        if AlchemyUI:IsShown() then
-            AlchemyUI:Hide()
+    if self.UI then
+        if self.UI:IsShown() then
+            self.UI:Hide()
         else
-            AlchemyUI:Show()
+            self.UI:Show()
         end
     else
         print("|cffff0000AlchemyHelper: UI не загружен.|r")
