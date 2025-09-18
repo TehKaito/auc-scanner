@@ -14,8 +14,14 @@ local function AucScanner_OnLoad()
     AucScannerFrame:SetMovable(true)
     AucScannerFrame:EnableMouse(true)
     AucScannerFrame:RegisterForDrag("LeftButton")
-    AucScannerFrame:SetScript("OnDragStart", AucScannerFrame.StartMoving)
-    AucScannerFrame:SetScript("OnDragStop", AucScannerFrame.StopMovingOrSizing)
+
+    AucScannerFrame:SetScript("OnDragStart", function(self)
+        self:StartMoving()
+    end)
+
+    AucScannerFrame:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+    end)
 end
 
 -- Ждём пока игрок войдёт в игру
