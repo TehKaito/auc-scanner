@@ -1,15 +1,16 @@
 -- =========================================================
 -- Auc Scanner — Peacebloom: минимальная цена и топ-5
 -- /aucs — показать/скрыть окно
+-- Vanilla/Turtle (1.12)
 -- =========================================================
 
 local SEARCH_NAME = "Peacebloom"
 
--- UI элементы
+-- UI
 local nameFont
 local priceLines = {}
 
--- ---------- Перетаскивание ----------
+-- ---------- Перетаскивание (дергается из XML) ----------
 function AucScanner_OnDragStart()
     if AucScannerFrame and AucScannerFrame:IsMovable() then
         AucScannerFrame:StartMoving()
@@ -21,26 +22,27 @@ function AucScanner_OnDragStop()
     end
 end
 
--- ---------- UI ----------
-local function EnsureLineCreated()
-    if not AucScannerFrame then return end
+-- ---------- UI helpers ----------
+local function EnsureTitle()
+    if not AucScannerFrame then return false end
     if not nameFont then
         nameFont = AucScannerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         nameFont:SetPoint("TOPLEFT", 20, -40)
         nameFont:SetText("Peacebloom")
     end
+    return true
 end
 
 local function ClearPriceLines()
-    for _, f in ipairs(priceLines) do f:Hide() end
+    for _, fs in ipairs(priceLines) do fs:Hide() end
     priceLines = {}
 end
 
-local function AddPriceLine(text, offset)
-    local line = AucScannerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    line:SetPoint("TOPLEFT", 20, -40 - offset)
-    line:SetText(text)
-    table.insert(priceLines, line)
+local function AddPriceLine(text, yOffset)
+    local fs = AucScannerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    fs:SetPoint("TOPLEFT", 20, -40 - yOffset)
+    fs:SetText(text)
+    table.insert(priceLines, fs)
 end
 
 -- ---------- Форматирование цены ----------
@@ -51,19 +53,17 @@ local function FormatMoney(copper)
     return string.format("%dg %ds %dc", g, s, c)
 end
 
--- ---------- Сбор цен с аука ----------
+-- ---------- Парсинг результатов аука ----------
 local function CollectPrices()
-    local numBatch = GetNumAuctionItems("list")
+    local num = GetNumAuctionItems("list")
     local prices = {}
-
-    for i = 1, numBatch do
+    for i = 1, num do
         local name, _, count, _, _, _, _, buyout = GetAuctionItemInfo("list", i)
-        if name and string.lower(name) == string.lower(SEARCH_NAME) and buyout and buyout > 0 then
-            local unitPrice = math.floor(buyout / count)
-            table.insert(prices, unitPrice)
+        if name and string.lower(name) == string.lower(SEARCH_NAME) and buyout and buyout > 0 and count and count > 0 then
+            local unit = math.floor(buyout / count)
+            table.insert(prices, unit)
         end
     end
-
     table.sort(prices)
     return prices
 end
@@ -71,43 +71,45 @@ end
 -- ---------- События ----------
 local function OnEvent(self, event, ...)
     if event == "VARIABLES_LOADED" then
-        AucScannerFrame:SetScript("OnShow", EnsureLineCreated)
+        -- регистрируем /aucs
+        SLASH_AUCSCANNER1 = "/aucs"
+        SlashCmdList["AUCSCANNER"] = function()
+            if not AucScannerFrame then
+                DEFAULT_CHAT_FRAME:AddMessage("|cffff5555[auc-scanner]|r Frame not loaded (check .toc order).")
+                return
+            end
+            if AucScannerFrame:IsShown() then
+                AucScannerFrame:Hide()
+            else
+                AucScannerFrame:Show()
+                EnsureTitle()
+                ClearPriceLines()
+                AddPriceLine("Откройте аукцион и нажмите Search…", 20)
+            end
+        end
+        DEFAULT_CHAT_FRAME:AddMessage("|cff88ff88[auc-scanner]|r команда /aucs готова")
 
     elseif event == "AUCTION_SHOW" then
-        -- запрашиваем Peacebloom при открытии аука
+        -- один запрос по названию
         QueryAuctionItems(SEARCH_NAME, 0, 0, 0, 0, 0, 0, 0, 0)
 
     elseif event == "AUCTION_ITEM_LIST_UPDATE" then
-        EnsureLineCreated()
+        if not EnsureTitle() then return end
         ClearPriceLines()
-
         local prices = CollectPrices()
         if #prices == 0 then
             AddPriceLine("Нет лотов", 20)
         else
             AddPriceLine("Мин. цена: " .. FormatMoney(prices[1]), 20)
-            for i = 1, math.min(5, #prices) do
-                AddPriceLine(i .. ") " .. FormatMoney(prices[i]), 20 + i*15)
+            local n = math.min(5, #prices)
+            for i = 1, n do
+                AddPriceLine(i .. ") " .. FormatMoney(prices[i]), 20 + i * 15)
             end
         end
     end
 end
 
--- ---------- Переключатель ----------
-local function AucScanner_Toggle()
-    if AucScannerFrame:IsShown() then
-        AucScannerFrame:Hide()
-    else
-        AucScannerFrame:Show()
-        EnsureLineCreated()
-        ClearPriceLines()
-        AddPriceLine("Откройте аукцион…", 20)
-    end
-end
-SLASH_AUCSCANNER1 = "/aucs"
-SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
-
--- ---------- Инициализация ----------
+-- ---------- Инициализация слушателя событий ----------
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("VARIABLES_LOADED")
 loader:RegisterEvent("AUCTION_SHOW")
