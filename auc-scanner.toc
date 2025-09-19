@@ -6,3 +6,4 @@
 
 auc-scanner.xml
 auc-scanner.lua
+auc-scanner-ui.lua
