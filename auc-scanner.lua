@@ -1,7 +1,6 @@
 -- =========================================================
 -- Auc Scanner — Peacebloom: минимальная цена и топ-5
 -- /aucs — показать/скрыть окно
--- Vanilla/Turtle (1.12)
 -- =========================================================
 
 local SEARCH_NAME = "Peacebloom"
@@ -70,48 +69,43 @@ end
 
 -- ---------- События ----------
 local function OnEvent(self, event, ...)
-    if event == "VARIABLES_LOADED" then
-        -- регистрируем /aucs
-        SLASH_AUCSCANNER1 = "/aucs"
-        SlashCmdList["AUCSCANNER"] = function()
-            if not AucScannerFrame then
-                DEFAULT_CHAT_FRAME:AddMessage("|cffff5555[auc-scanner]|r Frame not loaded (check .toc order).")
-                return
-            end
-            if AucScannerFrame:IsShown() then
-                AucScannerFrame:Hide()
-            else
-                AucScannerFrame:Show()
-                EnsureTitle()
-                ClearPriceLines()
-                AddPriceLine("Откройте аукцион и нажмите Search…", 20)
-            end
-        end
-        DEFAULT_CHAT_FRAME:AddMessage("|cff88ff88[auc-scanner]|r команда /aucs готова")
-
-    elseif event == "AUCTION_SHOW" then
-        -- один запрос по названию
+    if event == "AUCTION_SHOW" then
+        -- делаем запрос при открытии аука
         QueryAuctionItems(SEARCH_NAME, 0, 0, 0, 0, 0, 0, 0, 0)
 
     elseif event == "AUCTION_ITEM_LIST_UPDATE" then
-        if not EnsureTitle() then return end
+        EnsureTitle()
         ClearPriceLines()
         local prices = CollectPrices()
         if #prices == 0 then
             AddPriceLine("Нет лотов", 20)
         else
             AddPriceLine("Мин. цена: " .. FormatMoney(prices[1]), 20)
-            local n = math.min(5, #prices)
-            for i = 1, n do
+            for i = 1, math.min(5, #prices) do
                 AddPriceLine(i .. ") " .. FormatMoney(prices[i]), 20 + i * 15)
             end
         end
     end
 end
 
--- ---------- Инициализация слушателя событий ----------
+-- ---------- Переключатель ----------
+local function AucScanner_Toggle()
+    if AucScannerFrame:IsShown() then
+        AucScannerFrame:Hide()
+    else
+        AucScannerFrame:Show()
+        EnsureTitle()
+        ClearPriceLines()
+        AddPriceLine("Откройте аукцион и нажмите Search…", 20)
+    end
+end
+
+-- регистрируем slash-команду СРАЗУ
+SLASH_AUCSCANNER1 = "/aucs"
+SlashCmdList["AUCSCANNER"] = AucScanner_Toggle
+
+-- ---------- Инициализация ----------
 local loader = CreateFrame("Frame")
-loader:RegisterEvent("VARIABLES_LOADED")
 loader:RegisterEvent("AUCTION_SHOW")
 loader:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
 loader:SetScript("OnEvent", OnEvent)
